@@ -10,13 +10,14 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.List;
 
 final class ClassicBuilderGenerator extends AbstractBuilderGenerator {
     ClassicBuilderGenerator(Element annotatedElement, TypeElement targetClass, List<? extends VariableElement> attributes,
             Builder builderAnnotation, ExecutableElement targetCreationMethod,
-            Elements elements, Filer filer) {
-        super(annotatedElement, targetClass, attributes, builderAnnotation, targetCreationMethod, elements, filer);
+            Elements elements, Filer filer, Types types) {
+        super(annotatedElement, targetClass, attributes, builderAnnotation, targetCreationMethod, elements, filer, types);
     }
 
     @Override

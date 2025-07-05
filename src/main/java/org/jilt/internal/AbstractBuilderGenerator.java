@@ -27,7 +27,10 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
@@ -38,6 +41,7 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
     protected final Element annotatedElement;
     private final Elements elements;
     private final Filer filer;
+    private final Types types;
     private final Element optElement;
 
     private final TypeElement targetClassType;
@@ -50,10 +54,11 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
 
     AbstractBuilderGenerator(Element annotatedElement, TypeElement targetClass, List<? extends VariableElement> attributes,
             Builder builderAnnotation, ExecutableElement targetCreationMethod,
-            Elements elements, Filer filer) {
+            Elements elements, Filer filer, Types types) {
         this.annotatedElement = annotatedElement;
         this.elements = elements;
         this.filer = filer;
+        this.types = types;
         this.optElement = this.elements.getTypeElement(Opt.class.getCanonicalName());
 
         this.targetClassType = targetClass;
@@ -260,6 +265,16 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
             // To handle that case, default to the getter
             return getterMethod;
         }
+    }
+
+    private boolean attributeHasOneOfBooleanTypes(VariableElement attribute) {
+        TypeMirror attributeType = attribute.asType();
+        if (attributeType.getKind() == TypeKind.BOOLEAN) {
+            return true;
+        }
+        TypeMirror boxedBooleanType = this.types.boxedClass(
+                this.types.getPrimitiveType(TypeKind.BOOLEAN)).asType();
+        return this.types.isSameType(attributeType, boxedBooleanType);
     }
 
     private static boolean elementIsMethodWithoutArgumentsCalled(Element element, String methodName) {

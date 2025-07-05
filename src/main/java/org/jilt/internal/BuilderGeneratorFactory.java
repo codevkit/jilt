@@ -13,6 +13,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +30,12 @@ public final class BuilderGeneratorFactory {
 
     private final Filer filer;
     private final Elements elements;
+    private final Types types;
 
-    public BuilderGeneratorFactory(Filer filer, Elements elements) {
+    public BuilderGeneratorFactory(Filer filer, Elements elements, Types types) {
         this.filer = filer;
         this.elements = elements;
+        this.types = types;
     }
 
     public BuilderGenerator forElement(Element annotatedElement, RoundEnvironment roundEnv) throws Exception {
@@ -103,18 +106,18 @@ public final class BuilderGeneratorFactory {
             case STAGED:
             case TYPE_SAFE:
                 return new TypeSafeBuilderGenerator(annotatedElement, targetClass, attributes, builderAnnotation,
-                        builderInterfaces, targetCreationMethod, elements, filer);
+                        builderInterfaces, targetCreationMethod, elements, filer, types);
             case STAGED_PRESERVING_ORDER:
             case TYPE_SAFE_UNGROUPED_OPTIONALS:
                 return new TypeSafeUngroupedOptionalsBuilderGenerator(annotatedElement, targetClass, attributes, builderAnnotation,
-                        builderInterfaces, targetCreationMethod, elements, filer);
+                        builderInterfaces, targetCreationMethod, elements, filer, types);
             case FUNCTIONAL:
                 return new FunctionalBuilderGenerator(annotatedElement, targetClass, attributes, builderAnnotation,
-                        builderInterfaces, targetCreationMethod, elements, filer);
+                        builderInterfaces, targetCreationMethod, elements, filer, types);
             case CLASSIC:
             default:
                 return new ClassicBuilderGenerator(annotatedElement, targetClass, attributes, builderAnnotation,
-                        targetCreationMethod, elements, filer);
+                        targetCreationMethod, elements, filer, types);
         }
     }
 

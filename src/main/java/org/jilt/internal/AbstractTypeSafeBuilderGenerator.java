@@ -19,6 +19,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +31,8 @@ abstract class AbstractTypeSafeBuilderGenerator extends AbstractBuilderGenerator
 
     AbstractTypeSafeBuilderGenerator(Element annotatedElement, TypeElement targetClass, List<? extends VariableElement> attributes,
             Builder builderAnnotation, BuilderInterfaces builderInterfaces,
-            ExecutableElement targetCreationMethod, Elements elements, Filer filer) {
-        super(annotatedElement, targetClass, attributes, builderAnnotation, targetCreationMethod, elements, filer);
+            ExecutableElement targetCreationMethod, Elements elements, Filer filer, Types types) {
+        super(annotatedElement, targetClass, attributes, builderAnnotation, targetCreationMethod, elements, filer, types);
         this.optionalAttributes = this.initOptionalAttributes(attributes);
         this.builderInterfaces = builderInterfaces;
     }

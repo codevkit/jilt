@@ -23,7 +23,8 @@ public class JiltAnnotationProcessor extends AbstractProcessor {
 
         this.messager = processingEnv.getMessager();
         this.builderGeneratorFactory = new BuilderGeneratorFactory(
-                processingEnv.getFiler(), processingEnv.getElementUtils());
+                processingEnv.getFiler(), processingEnv.getElementUtils(),
+                processingEnv.getTypeUtils());
     }
 
     @Override
