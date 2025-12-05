@@ -1,3 +1,8 @@
+Version 1.9 (2025-12-05)
+------------------------
+- Copy source JavaDocs to the Builder setter methods
+  ([Issue #72](https://github.com/skinny85/jilt/issues/72))
+
 Version 1.8.4 (2025-10-29)
 --------------------------
 - Allow placing `@Builder` on abstract methods
