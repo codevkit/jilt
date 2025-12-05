@@ -80,7 +80,7 @@ Version 1.4 (2024-01-28)
 
 Version 1.3 (2024-01-09)
 ------------------------
-- Allow placing `@Builder` on Java 16+ `record` declarations ([Issue #9](https://github.com/skinny85/jilt/issues/9))
+- Allow placing `@Builder` on Java 14+ `record` declarations ([Issue #9](https://github.com/skinny85/jilt/issues/9))
 
 Version 1.2 (2023-01-08)
 ------------------------
