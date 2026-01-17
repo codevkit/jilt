@@ -1,3 +1,8 @@
+Version 1.9.1 (2026-01-18)
+--------------------------
+- Handle getters returning `Optional` for nullable fields in `toBuilder`
+  ([Issue #75](https://github.com/skinny85/jilt/issues/75))
+
 Version 1.9 (2025-12-05)
 ------------------------
 - Copy source JavaDocs to the Builder setter methods
