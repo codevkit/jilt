@@ -5,8 +5,8 @@ plugins {
     id 'maven-publish'
 }
 
-group 'cc.jilt' // we need a domain we own for Maven Central, and jilt.org is scalped
-version '1.9.1'
+group 'io.github.codevkit.jilt'
+version '1.9.1-fork.1'
 
 shadowJar {
     relocate 'com', 'org.jilt.shaded.com'
@@ -24,11 +24,18 @@ artifacts {
     archives shadowJar, sourcesJar, javadocJar
 }
 
-// defaults if the value of the username and password for Maven Central is not found -
-// they are only needed when running the 'publishShadowPublicationToMavenCentralRepository'
-// task to release a new version
-def ossrhUsername = findProperty('ossrhUsername') ?: 'username'
-def ossrhPassword = findProperty('ossrhPassword') ?: 'password'
+def mavenCentralUsername = providers.gradleProperty('mavenCentralUsername')
+        .orElse(providers.gradleProperty('ossrhUsername'))
+        .orElse(providers.gradleProperty('SONATYPE_USERNAME'))
+        .orElse(providers.environmentVariable('MAVEN_CENTRAL_USERNAME'))
+        .orElse(providers.environmentVariable('SONATYPE_USERNAME'))
+        .orElse('')
+def mavenCentralPassword = providers.gradleProperty('mavenCentralPassword')
+        .orElse(providers.gradleProperty('ossrhPassword'))
+        .orElse(providers.gradleProperty('SONATYPE_PASSWORD'))
+        .orElse(providers.environmentVariable('MAVEN_CENTRAL_PASSWORD'))
+        .orElse(providers.environmentVariable('SONATYPE_PASSWORD'))
+        .orElse('')
 
 publishing {
     publications {
@@ -38,10 +45,10 @@ publishing {
             pom {
                 name = 'Jilt'
                 description = 'Java annotation processor library for auto-generating Builder (including Staged Builder) pattern classes'
-                url = 'https://github.com/skinny85/jilt'
+                url = 'https://github.com/codevkit/jilt'
 
                 scm {
-                    url = 'https://github.com/skinny85/jilt.git'
+                    url = 'https://github.com/codevkit/jilt.git'
                 }
 
                 licenses {
@@ -53,7 +60,8 @@ publishing {
 
                 developers {
                     developer {
-                        name = 'Adam Ruka'
+                        id = 'codevkit'
+                        name = 'Codevkit'
                     }
                 }
             }
@@ -63,8 +71,8 @@ publishing {
         maven {
             url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
             credentials {
-                username = ossrhUsername
-                password = ossrhPassword
+                username = mavenCentralUsername.get()
+                password = mavenCentralPassword.get()
             }
             name = 'MavenCentral'
         }
@@ -72,13 +80,29 @@ publishing {
 }
 
 signing {
-    useGpgCmd()
+    def signingKey = providers.gradleProperty('signingKey')
+            .orElse(providers.environmentVariable('SIGNING_KEY'))
+    def signingPassword = providers.gradleProperty('signingPassword')
+            .orElse(providers.environmentVariable('SIGNING_PASSWORD'))
+            .orElse('')
+    if (signingKey.isPresent()) {
+        useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
+    } else {
+        useGpgCmd()
+    }
     sign publishing.publications.shadow
 }
 // turn off signing unless we're uploading archives to Maven Central,
 // as it will fail if a valid PGP key is not set
 tasks.withType(Sign).configureEach {
     onlyIf { project.hasProperty('publishToMavenCentral') }
+}
+
+tasks.named('publishShadowPublicationToMavenCentralRepository').configure {
+    doFirst {
+        requireMavenCentralValue(mavenCentralUsername, 'Maven Central username is required')
+        requireMavenCentralValue(mavenCentralPassword, 'Maven Central password is required')
+    }
 }
 
 repositories {
@@ -113,4 +137,10 @@ dependencies {
 // creates an implicit dependency on shadowJar from compileTestJava
 tasks.named('compileTestJava').configure {
     it.dependsOn(tasks.named('shadowJar'))
+}
+
+void requireMavenCentralValue(provider, String message) {
+    if (provider.get().trim().isEmpty()) {
+        throw new GradleException("${message}. Configure a Gradle property or matching environment variable.")
+    }
 }

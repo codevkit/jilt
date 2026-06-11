@@ -1,4 +1,4 @@
-# Jilt [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![See on Maven Central](https://img.shields.io/badge/Maven%20Central-v1.9.1-brightgreen.svg)](https://central.sonatype.com/artifact/cc.jilt/jilt/1.9.1) [![Build status](https://github.com/skinny85/jilt/actions/workflows/build.yaml/badge.svg)](https://github.com/skinny85/jilt/actions/workflows/build.yaml)
+# Jilt [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build status](https://github.com/codevkit/jilt/actions/workflows/build.yaml/badge.svg)](https://github.com/codevkit/jilt/actions/workflows/build.yaml)
 
 Jilt is a Java library that automatically generates classes implementing the
 [Builder design pattern](https://en.wikipedia.org/wiki/Builder_pattern#Java).
@@ -80,16 +80,16 @@ Check out the [documentation below](#customizing-the-generated-code) for ways to
 
 #### Getting Jilt
 
-Jilt is available from the [Maven Central](https://central.sonatype.com/namespace/cc.jilt) repository.
+The Codevkit Jilt fork is published independently from the upstream `cc.jilt` artifact.
 
 Example Maven settings:
 
 ```xml
 <dependencies>
     <dependency>
-        <groupId>cc.jilt</groupId>
+        <groupId>io.github.codevkit.jilt</groupId>
         <artifactId>jilt</artifactId>
-        <version>1.9.1</version>
+        <version>1.9.1-fork.1</version>
         <scope>provided</scope> <!-- Jilt is not needed at runtime -->
     </dependency>
 </dependencies>
@@ -104,14 +104,14 @@ repositories {
 
 dependencies {
     // ...
-    compileOnly("cc.jilt:jilt:1.9.1") // Jilt is not needed at runtime
-    annotationProcessor("cc.jilt:jilt:1.9.1") // you might also need this dependency in newer Gradle versions
+    compileOnly("io.github.codevkit.jilt:jilt:1.9.1-fork.1") // Jilt is not needed at runtime
+    annotationProcessor("io.github.codevkit.jilt:jilt:1.9.1-fork.1") // you might also need this dependency in newer Gradle versions
 }
 ```
 
 If you're not using dependency managers, you can
-[download the JAR directly](https://repo1.maven.org/maven2/cc/jilt/jilt/1.9.1/jilt-1.9.1.jar)
-(it's distributed as a self-contained JAR, you don't need any additional dependencies for it)
+[download the JAR directly](https://repo1.maven.org/maven2/io/github/codevkit/jilt/jilt/1.9.1-fork.1/jilt-1.9.1-fork.1.jar)
+after the fork release is published
 and add it to your classpath.
 
 #### Customizing the generated code

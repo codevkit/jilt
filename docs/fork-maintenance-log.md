@@ -38,6 +38,6 @@ The goal is to make every future upstream refresh reproducible: we should know w
 - Fork branch: `master`
 - Fork feature commit: `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e`
 - Fork release commit: pending.
-- Published Maven version: pending.
+- Published Maven version: pending. Planned first fork version: `1.9.1-fork.1`.
 - Verification: `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt test --rerun-tasks`
 - Notes: Initial fork-only implementation adds context builder support through `@Builder` `contextType` and `contextMethod`.

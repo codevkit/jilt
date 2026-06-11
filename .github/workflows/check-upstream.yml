@@ -47,6 +47,18 @@ jobs:
             | sed -E 's/-fork[.][0-9]+$//' \
             | grep -E '^[0-9]+[.][0-9]+([.][0-9]+)?$' \
             || true)"
+          if [[ -z "${recorded_upstream_version}" ]]; then
+            recorded_upstream_version="$(awk '
+                /^- Upstream base tag: / {
+                    value = $0
+                    sub("^- Upstream base tag: ", "", value)
+                    gsub("`", "", value)
+                }
+                END { print value }
+            ' docs/fork-maintenance-log.md \
+              | grep -E '^[0-9]+[.][0-9]+([.][0-9]+)?$' \
+              || true)"
+          fi
 
           if [[ -z "${recorded_base_commit}" ]]; then
             echo "Could not find an upstream base commit in docs/fork-maintenance-log.md" >&2
