@@ -307,6 +307,29 @@ public @interface Builder {
     String factoryMethod() default "";
 
     /**
+     * Allows declaring a single context parameter type for the generated Builder.
+     * <p>
+     * When set, the generated Builder stores one argument of this type. The generated build method then calls
+     * a method with the same name as {@link #contextMethod()} on the constructed target object, passing the
+     * stored argument.
+     * <p>
+     * This is an optional attribute - the default is {@link Void}, which means the generated factory method
+     * has no context parameter.
+     */
+    Class<?> contextType() default Void.class;
+
+    /**
+     * Allows changing the name of the context method used together with {@link #contextType()}.
+     * <p>
+     * For regular Builders, this is the name of the static factory method accepting the context parameter.
+     * For Functional Builders, this is the name of the generated functional setter accepting the context
+     * parameter. In both cases, it is also the target method called by the generated build method.
+     * <p>
+     * This is an optional attribute - the default is to use {@link #factoryMethod()}.
+     */
+    String contextMethod() default "";
+
+    /**
      * Allows changing the name of the 'build' method (the method used in the last step of
      * building to actually obtain an instance of the built class).
      * Must be a valid Java method name.

@@ -21,6 +21,7 @@ import org.jilt.Opt;
 import org.jilt.utils.Utils;
 
 import javax.annotation.processing.Filer;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -42,6 +43,8 @@ import java.util.stream.Collectors;
 
 abstract class AbstractBuilderGenerator implements BuilderGenerator {
     private static final ClassName JAVA_UTIL_OPTIONAL = ClassName.get("java.util", "Optional");
+    private static final ClassName JAVA_LANG_VOID = ClassName.get(Void.class);
+    protected static final String CONTEXT_VALUE = "contextValue";
 
     protected final Element annotatedElement;
     private final Elements elements;
@@ -52,6 +55,7 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
     private final List<? extends VariableElement> attributes;
     private final Builder builderAnnotation;
     /** nullable */ private final ExecutableElement targetCreationMethod;
+    /** nullable */ private final TypeMirror contextType;
 
     private final String builderClassPackage;
     private final ClassName builderClassClassName;
@@ -68,10 +72,12 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
         this.attributes = attributes;
         this.builderAnnotation = builderAnnotation;
         this.targetCreationMethod = targetCreationMethod;
+        this.contextType = this.initContextType();
 
         this.builderClassPackage = this.initBuilderClassPackage();
         this.builderClassClassName = ClassName.get(this.builderClassPackage(),
                 this.builderClassStringName());
+        this.validateContextAttributes();
     }
 
     @Override
@@ -96,6 +102,8 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
         if (toBuilderMethod != null) {
             builderClassBuilder.addMethod(toBuilderMethod);
         }
+
+        this.addContextFieldAndConstructor(builderClassBuilder);
 
         // add a field and setter for each attribute of the built class
         for (VariableElement attribute : attributes) {
@@ -141,13 +149,43 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
             return null;
         }
 
-        return MethodSpec
-                .methodBuilder(this.builderFactoryMethodName())
+        MethodSpec.Builder factoryMethod = MethodSpec
+                .methodBuilder(this.contextFactoryMethodName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addTypeVariables(this.builderClassTypeParameters())
-                .returns(builderFactoryMethodReturnType())
-                .addStatement("return new $T()", this.builderClassTypeName())
-                .build();
+                .returns(builderFactoryMethodReturnType());
+        TypeMirror contextType = this.contextType();
+        if (contextType == null) {
+            factoryMethod.addStatement("return new $T()", this.builderClassTypeName());
+        } else {
+            factoryMethod
+                    .addParameter(TypeName.get(contextType), CONTEXT_VALUE)
+                    .addStatement("return new $T($L)", this.builderClassTypeName(), CONTEXT_VALUE);
+        }
+        return factoryMethod.build();
+    }
+
+    private void addContextFieldAndConstructor(TypeSpec.Builder builderClassBuilder) {
+        TypeMirror contextType = this.contextType();
+        if (contextType == null) {
+            return;
+        }
+
+        TypeName contextTypeName = TypeName.get(contextType);
+        builderClassBuilder.addField(FieldSpec
+                .builder(contextTypeName, CONTEXT_VALUE,
+                        this.builderClassNeedsToBeAbstract()
+                                ? Modifier.PROTECTED
+                                : Modifier.PRIVATE)
+                .build());
+        if (!this.builderClassNeedsToBeAbstract()) {
+            builderClassBuilder.addMethod(MethodSpec
+                    .constructorBuilder()
+                    .addModifiers(Modifier.PRIVATE)
+                    .addParameter(contextTypeName, CONTEXT_VALUE)
+                    .addStatement("this.$1L = $1L", CONTEXT_VALUE)
+                    .build());
+        }
     }
 
     protected MethodSpec makeToBuilderMethod() {
@@ -209,16 +247,62 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
         } else {
             String attributes = Utils.join(this.attributeNames());
             if (this.targetCreationMethodIsConstructor()) {
-                buildMethod.addStatement("return new $T($L)", this.targetClassTypeName(), attributes);
+                buildTarget(buildMethod, CodeBlock.of("new $T($L)", this.targetClassTypeName(), attributes));
             } else {
-                buildMethod.addStatement("return $T.$L($L)",
+                buildTarget(buildMethod, CodeBlock.of("$T.$L($L)",
                         // using ClassName gets rid of any type parameters the class might have
                         ClassName.get((TypeElement) this.targetCreationMethod.getEnclosingElement()),
                         this.targetCreationMethod.getSimpleName(),
-                        attributes);
+                        attributes));
             }
         }
         return buildMethod.build();
+    }
+
+    private void buildTarget(MethodSpec.Builder buildMethod, CodeBlock targetExpression) {
+        if (this.contextType() == null) {
+            buildMethod.addStatement("return $L", targetExpression);
+        } else {
+            buildMethod.addStatement("$T target = $L", this.targetClassTypeName(), targetExpression);
+            buildMethod.addStatement("return target.$L($L)", this.contextMethodName(), CONTEXT_VALUE);
+        }
+    }
+
+    protected final TypeMirror contextType() {
+        return contextType;
+    }
+
+    private TypeMirror initContextType() {
+        try {
+            TypeMirror type = this.elements.getTypeElement(this.builderAnnotation.contextType().getCanonicalName()).asType();
+            return TypeName.get(type).equals(JAVA_LANG_VOID) ? null : type;
+        } catch (MirroredTypeException e) {
+            TypeMirror type = e.getTypeMirror();
+            return TypeName.get(type).equals(JAVA_LANG_VOID) ? null : type;
+        }
+    }
+
+    protected final String contextMethodName() {
+        String annotationContextMethod = this.builderAnnotation.contextMethod();
+        return annotationContextMethod.isEmpty()
+                ? this.builderFactoryMethodName()
+                : annotationContextMethod;
+    }
+
+    private String contextFactoryMethodName() {
+        return this.contextType() == null
+                ? this.builderFactoryMethodName()
+                : this.contextMethodName();
+    }
+
+    private void validateContextAttributes() {
+        if (this.contextType() == null) {
+            if (!this.builderAnnotation.contextMethod().isEmpty()) {
+                throw new IllegalArgumentException("contextMethod can only be used together with contextType");
+            }
+        } else if (!this.builderAnnotation.toBuilder().isEmpty()) {
+            throw new IllegalArgumentException("contextType cannot be used together with toBuilder");
+        }
     }
 
     protected final Iterable<? extends TypeName> targetCreationMethodThrownExceptions() {

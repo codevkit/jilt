@@ -91,6 +91,13 @@ final class FunctionalBuilderGenerator extends AbstractTypeSafeBuilderGenerator 
                     .build());
         }
 
+        TypeName baseSetterType = this.innerInterfaceNamed(this.baseSetterInterfaceName(), false);
+        if (this.contextType() != null) {
+            method.addParameter(ParameterSpec
+                    .builder(baseSetterType, this.contextMethodName())
+                    .build());
+        }
+
         // remaining parameters - one for each required property,
         // and one variadic property for the optional ones
         boolean hasOptionalAttribute = false;
@@ -117,6 +124,9 @@ final class FunctionalBuilderGenerator extends AbstractTypeSafeBuilderGenerator 
         if (!this.builderClassNeedsToBeAbstract()) {
             // if the Builder is not abstract, create a new instance of it
             method.addStatement("$1T $2N = new $1T()", this.builderClassTypeName(), builderVariableName);
+        }
+        if (this.contextType() != null) {
+            method.addStatement("$N.accept($N)", this.contextMethodName(), builderVariableName);
         }
         for (VariableElement currentAttribute : this.attributes()) {
             if (this.isOptional(currentAttribute)) {
@@ -153,6 +163,7 @@ final class FunctionalBuilderGenerator extends AbstractTypeSafeBuilderGenerator 
             }
         }
         if (!hasOptionalAttribute) {
+            addContextSetter(builderClassBuilder);
             return;
         }
 
@@ -168,6 +179,7 @@ final class FunctionalBuilderGenerator extends AbstractTypeSafeBuilderGenerator 
             }
         }
         builderClassBuilder.addType(optionalSettersClass.build());
+        addContextSetter(builderClassBuilder);
     }
 
     @Override
@@ -302,5 +314,22 @@ final class FunctionalBuilderGenerator extends AbstractTypeSafeBuilderGenerator 
         return ParameterSpec
                 .builder(this.builderClassTypeName(), this.builderClassMethodParamName())
                 .build();
+    }
+
+    private void addContextSetter(TypeSpec.Builder builderClassBuilder) {
+        if (this.contextType() == null) {
+            return;
+        }
+
+        builderClassBuilder.addMethod(MethodSpec
+                .methodBuilder(this.contextMethodName())
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addTypeVariables(this.builderClassTypeParameters())
+                .returns(this.innerInterfaceNamed(this.baseSetterInterfaceName(), false))
+                .addParameter(TypeName.get(this.contextType()), CONTEXT_VALUE)
+                .addStatement("return $1L -> $1L.$2L = $2L",
+                        this.builderClassMethodParamName(),
+                        CONTEXT_VALUE)
+                .build());
     }
 }
