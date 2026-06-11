@@ -1,0 +1,149 @@
+name: Check upstream jilt
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out fork
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check upstream state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_URL: https://github.com/skinny85/jilt.git
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          recorded_base_commit="$(awk '
+              /^- Upstream base commit: / {
+                  value = $0
+                  sub("^- Upstream base commit: ", "", value)
+                  gsub("`", "", value)
+              }
+              END { print value }
+          ' docs/fork-maintenance-log.md)"
+
+          recorded_version="$(awk '
+              /^- Published Maven version: / {
+                  value = $0
+                  sub("^- Published Maven version: ", "", value)
+                  gsub("`", "", value)
+              }
+              END { print value }
+          ' docs/fork-maintenance-log.md)"
+          recorded_upstream_version="$(printf '%s' "${recorded_version}" \
+            | sed -E 's/-fork[.][0-9]+$//' \
+            | grep -E '^[0-9]+[.][0-9]+([.][0-9]+)?$' \
+            || true)"
+
+          if [[ -z "${recorded_base_commit}" ]]; then
+            echo "Could not find an upstream base commit in docs/fork-maintenance-log.md" >&2
+            exit 1
+          fi
+
+          if git remote get-url upstream >/dev/null 2>&1; then
+            git remote set-url upstream "${UPSTREAM_URL}"
+          else
+            git remote add upstream "${UPSTREAM_URL}"
+          fi
+          upstream_default_branch="$(git ls-remote --symref upstream HEAD \
+            | awk '/^ref:/ { sub("refs/heads/", "", $2); print $2 }')"
+
+          if [[ -z "${upstream_default_branch}" ]]; then
+            echo "Could not resolve upstream default branch" >&2
+            exit 1
+          fi
+
+          git fetch --quiet upstream \
+            "refs/heads/${upstream_default_branch}:refs/remotes/upstream/${upstream_default_branch}" \
+            "+refs/tags/*:refs/tags/*"
+
+          upstream_head="$(git rev-parse "refs/remotes/upstream/${upstream_default_branch}")"
+          upstream_head_short="$(git rev-parse --short "${upstream_head}")"
+          latest_upstream_tag="$(git tag --list \
+            | grep -E '^[0-9]+[.][0-9]+([.][0-9]+)?$' \
+            | sort -V \
+            | tail -n 1 \
+            || true)"
+
+          tag_changed=false
+          if [[ -n "${latest_upstream_tag}" && -n "${recorded_upstream_version}" \
+            && "${latest_upstream_tag}" != "${recorded_upstream_version}" ]]; then
+            tag_changed=true
+          fi
+
+          head_changed=false
+          if [[ "${recorded_base_commit}" == "${upstream_head}" ]]; then
+            upstream_commits="0"
+            comparison_url="https://github.com/skinny85/jilt/commit/${upstream_head}"
+            relationship="Recorded base matches upstream ${upstream_default_branch}."
+          elif git merge-base --is-ancestor "${recorded_base_commit}" "${upstream_head}"; then
+            head_changed=true
+            upstream_commits="$(git rev-list --count "${recorded_base_commit}..${upstream_head}")"
+            comparison_url="https://github.com/skinny85/jilt/compare/${recorded_base_commit}...${upstream_head}"
+            relationship="Recorded base is an ancestor of upstream ${upstream_default_branch}; ${upstream_commits} upstream commit(s) are available."
+          else
+            head_changed=true
+            upstream_commits="unknown"
+            comparison_url="https://github.com/skinny85/jilt/compare/${recorded_base_commit}...${upstream_head}"
+            relationship="Recorded base is not an ancestor of upstream ${upstream_default_branch}. Manual inspection is required."
+          fi
+
+          if [[ "${head_changed}" == "false" && "${tag_changed}" == "false" ]]; then
+            echo "No upstream branch or release-tag update beyond the recorded fork base."
+            exit 0
+          fi
+
+          title="Track upstream jilt updates"
+          existing_issue="$(gh api \
+            --method GET \
+            "repos/${GITHUB_REPOSITORY}/issues" \
+            -f state=open \
+            -f per_page=100 \
+            --jq ".[] | select(.title == \"${title}\") | .number" \
+            | head -n 1)"
+
+          if [[ -n "${existing_issue}" ]]; then
+            echo "Open upstream tracking issue already exists: #${existing_issue}"
+            exit 0
+          fi
+
+          body="$(cat <<EOF
+          Upstream skinny85/jilt has moved beyond the fork base recorded in docs/fork-maintenance-log.md.
+
+          - Recorded fork Maven version: ${recorded_version:-unknown}
+          - Recorded upstream base commit: \`${recorded_base_commit}\`
+          - Upstream default branch: \`${upstream_default_branch}\`
+          - Upstream HEAD: \`${upstream_head}\`
+          - Latest upstream release tag: \`${latest_upstream_tag:-unknown}\`
+          - Relationship: ${relationship}
+          - Compare: ${comparison_url}
+
+          This workflow only opens a tracking issue. Do not automatically merge upstream changes.
+
+          Suggested follow-up:
+
+          1. Fetch upstream locally and inspect the commit range.
+          2. Decide whether to merge or rebase the fork feature stack.
+          3. Run the full Gradle verification gate for Jilt.
+          4. Update docs/fork-maintenance-log.md with the exact upstream and fork commit positions if a refresh is performed.
+          EOF
+          )"
+
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/issues" \
+            -f title="${title}" \
+            -f body="${body}"
