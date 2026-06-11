@@ -37,7 +37,13 @@ The goal is to make every future upstream refresh reproducible: we should know w
 - Upstream base commit: `b7f356da8cb61250bfa8657d82cb8c7ed3e7da45`
 - Fork branch: `master`
 - Fork feature commit: `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e`
-- Fork release commit: pending.
-- Published Maven version: pending. Planned first fork version: `1.9.1-fork.1`.
-- Verification: `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt test --rerun-tasks`
+- Fork release commit: `f10cd4d5980f409b587d5e71d4aad77bde8e6762`
+- Published Maven version: `1.9.1-fork.1`
+- Verification:
+  - `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt test --rerun-tasks`
+  - `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt generatePomFileForShadowPublication`
+  - `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt publishToMavenLocal`
+  - `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt clean build check`
+  - `/Users/ylw/Zero/jilt/gradlew -p /Users/ylw/Zero/jilt publishShadowPublicationToMavenCentralRepository -PpublishToMavenCentral=true`
+  - Central Portal deployment `e8e0b4b2-cc3c-4575-98b8-9f635d3ffdd1` published successfully.
 - Notes: Initial fork-only implementation adds context builder support through `@Builder` `contextType` and `contextMethod`.
