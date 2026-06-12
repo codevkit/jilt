@@ -89,7 +89,7 @@ Example Maven settings:
     <dependency>
         <groupId>io.github.codevkit.jilt</groupId>
         <artifactId>jilt</artifactId>
-        <version>1.9.1-fork.1</version>
+        <version>1.9.1-fork.2</version>
         <scope>provided</scope> <!-- Jilt is not needed at runtime -->
     </dependency>
 </dependencies>
@@ -104,13 +104,13 @@ repositories {
 
 dependencies {
     // ...
-    compileOnly("io.github.codevkit.jilt:jilt:1.9.1-fork.1") // Jilt is not needed at runtime
-    annotationProcessor("io.github.codevkit.jilt:jilt:1.9.1-fork.1") // you might also need this dependency in newer Gradle versions
+    compileOnly("io.github.codevkit.jilt:jilt:1.9.1-fork.2") // Jilt is not needed at runtime
+    annotationProcessor("io.github.codevkit.jilt:jilt:1.9.1-fork.2") // you might also need this dependency in newer Gradle versions
 }
 ```
 
 If you're not using dependency managers, you can
-[download the JAR directly](https://repo1.maven.org/maven2/io/github/codevkit/jilt/jilt/1.9.1-fork.1/jilt-1.9.1-fork.1.jar)
+[download the JAR directly](https://repo1.maven.org/maven2/io/github/codevkit/jilt/jilt/1.9.1-fork.2/jilt-1.9.1-fork.2.jar)
 after the fork release is published
 and add it to your classpath.
 

@@ -5,7 +5,7 @@ This fork publishes independently from upstream Jilt.
 ## Coordinates
 
 ```text
-io.github.codevkit.jilt:jilt:1.9.1-fork.1
+io.github.codevkit.jilt:jilt:1.9.1-fork.2
 ```
 
 Keep fork releases on the upstream-version-plus-fork-counter line:
