@@ -39,6 +39,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 abstract class AbstractBuilderGenerator implements BuilderGenerator {
@@ -600,7 +601,7 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
         return annotationBuilderClassName.isEmpty()
                 ? this.targetClassSimpleName() + "Builder"
                 // we need to replace any '*' in className with the target class's name
-                : annotationBuilderClassName.replaceAll("\\*", this.targetClassSimpleName().toString());
+                : annotationBuilderClassName.replaceAll("\\*", Matcher.quoteReplacement(this.targetClassSimpleName().toString()));
     }
 
     protected final Filer filer() {

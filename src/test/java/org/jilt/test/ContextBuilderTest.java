@@ -1,5 +1,7 @@
 package org.jilt.test;
 
+import org.jilt.test.data.context.DollarNamedFollowedValue;
+import org.jilt.test.data.context.DollarNamedFollowedValue$;
 import org.jilt.test.data.context.FollowSource;
 import org.jilt.test.data.context.FunctionalFollowedValue;
 import org.jilt.test.data.context.FollowedValue;
@@ -32,6 +34,18 @@ public class ContextBuilderTest {
         FunctionalFollowedValue value = functionalFollowedValue(
                 follow(source),
                 name("value"));
+
+        assertThat(value.name).isEqualTo("value");
+        assertThat(value.followed).isSameAs(source);
+    }
+
+    @Test
+    public void test_outer_interface_name_supports_target_class_placeholder() {
+        FollowSource source = new FollowSource("source");
+
+        DollarNamedFollowedValue value = DollarNamedFollowedValue$.follow(source)
+                .name("value")
+                .build();
 
         assertThat(value.name).isEqualTo("value");
         assertThat(value.followed).isSameAs(source);

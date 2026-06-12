@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 abstract class AbstractTypeSafeBuilderGenerator extends AbstractBuilderGenerator {
     private final Set<VariableElement> optionalAttributes;
@@ -61,7 +62,7 @@ abstract class AbstractTypeSafeBuilderGenerator extends AbstractBuilderGenerator
                 : builderInterfaces.outerName();
         return nameFromAnnotation.isEmpty()
                 ? this.builderClassStringName() + "s"
-                : nameFromAnnotation;
+                : nameFromAnnotation.replaceAll("\\*", Matcher.quoteReplacement(this.targetClassSimpleName().toString()));
     }
 
     protected final String outerInterfacesPackage() {
@@ -157,7 +158,7 @@ abstract class AbstractTypeSafeBuilderGenerator extends AbstractBuilderGenerator
 
         return namesPattern.isEmpty()
                 ? baseName
-                : namesPattern.replaceAll("\\*", baseName);
+                : namesPattern.replaceAll("\\*", Matcher.quoteReplacement(baseName));
     }
 
     private Set<VariableElement> initOptionalAttributes(List<? extends VariableElement> attributes) {

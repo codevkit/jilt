@@ -37,6 +37,9 @@ public @interface BuilderInterfaces {
      * will be generated as inner interfaces of this outer interface,
      * in order not to pollute the global namespace.
      * <p>
+     * The value can include the {@code *} character, which will be substituted with the
+     * name of the target class.
+     * <p>
      * This is an optional attribute, the default name is <code>&lt;BuilderClass&gt;</code>
      * with an "s" appended to the end of the name
      * (the Builder class's name is <code>&lt;TargetClass&gt;Builder</code> by default,
