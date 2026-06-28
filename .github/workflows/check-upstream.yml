@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out fork
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
@@ -119,20 +119,10 @@ jobs:
           fi
 
           title="Track upstream jilt updates"
-          existing_issue="$(gh api \
-            --method GET \
-            "repos/${GITHUB_REPOSITORY}/issues" \
-            -f state=open \
-            -f per_page=100 \
-            --jq ".[] | select(.title == \"${title}\") | .number" \
-            | head -n 1)"
-
-          if [[ -n "${existing_issue}" ]]; then
-            echo "Open upstream tracking issue already exists: #${existing_issue}"
-            exit 0
-          fi
-
+          state_marker="<!-- upstream-tracking-state: latest-tag=${latest_upstream_tag:-unknown} upstream-head=${upstream_head} -->"
           body="$(cat <<EOF
+          ${state_marker}
+
           Upstream skinny85/jilt has moved beyond the fork base recorded in docs/fork-maintenance-log.md.
 
           - Recorded fork Maven version: ${recorded_version:-unknown}
@@ -143,7 +133,7 @@ jobs:
           - Relationship: ${relationship}
           - Compare: ${comparison_url}
 
-          This workflow only opens a tracking issue. Do not automatically merge upstream changes.
+          This workflow only tracks upstream changes. Do not automatically merge upstream changes.
 
           Suggested follow-up:
 
@@ -153,6 +143,53 @@ jobs:
           4. Update docs/fork-maintenance-log.md with the exact upstream and fork commit positions if a refresh is performed.
           EOF
           )"
+          comment_body="$(cat <<EOF
+          Detected a new upstream skinny85/jilt state.
+
+          - Recorded fork Maven version: ${recorded_version:-unknown}
+          - Recorded upstream base commit: \`${recorded_base_commit}\`
+          - Upstream default branch: \`${upstream_default_branch}\`
+          - Upstream HEAD: \`${upstream_head}\`
+          - Latest upstream release tag: \`${latest_upstream_tag:-unknown}\`
+          - Relationship: ${relationship}
+          - Compare: ${comparison_url}
+
+          The tracking issue body has been updated with this latest state.
+          EOF
+          )"
+
+          existing_issue="$(gh api \
+            --method GET \
+            "repos/${GITHUB_REPOSITORY}/issues" \
+            -f state=open \
+            -f per_page=100 \
+            --jq ".[] | select(.title == \"${title}\") | .number" \
+            | head -n 1)"
+
+          if [[ -n "${existing_issue}" ]]; then
+            existing_issue_body="$(gh api \
+              --method GET \
+              "repos/${GITHUB_REPOSITORY}/issues/${existing_issue}" \
+              --jq '.body // ""')"
+
+            if grep -Fq "${state_marker}" <<< "${existing_issue_body}"; then
+              echo "Open upstream tracking issue #${existing_issue} already tracks the latest upstream state."
+              exit 0
+            fi
+
+            gh api \
+              --method PATCH \
+              "repos/${GITHUB_REPOSITORY}/issues/${existing_issue}" \
+              -f body="${body}"
+
+            gh api \
+              --method POST \
+              "repos/${GITHUB_REPOSITORY}/issues/${existing_issue}/comments" \
+              -f body="${comment_body}"
+
+            echo "Updated upstream tracking issue #${existing_issue}."
+            exit 0
+          fi
 
           gh api \
             --method POST \
