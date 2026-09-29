@@ -2,12 +2,13 @@
 
 This file records the exact upstream and fork commit positions used to maintain the Codevkit Jilt fork.
 
-The goal is to make every future upstream refresh reproducible: we should know which upstream commit the fork was based on, which fork commit introduced or refreshed fork-only changes, and which Maven version was published from that state.
+The goal is to make every future upstream refresh reproducible: we should know which upstream commit the fork was based on, which fork commits make up the active fork-only feature stack, and which Maven version was published from that state.
 
 ## Rules
 
 - Record one entry for every upstream sync or fork release.
 - Record immutable commit SHAs, not only branch names.
+- Record the complete active fork-only feature commit stack in every entry.
 - Keep upstream sync commits separate from fork feature commits whenever possible.
 - Update this file in the same commit that completes a fork refresh or release preparation.
 - Do not use this file as a changelog for ordinary implementation details; it is a commit-position ledger.
@@ -22,7 +23,7 @@ The goal is to make every future upstream refresh reproducible: we should know w
 - Upstream base tag:
 - Upstream base commit:
 - Fork branch:
-- Fork feature commit:
+- Fork feature commits:
 - Fork release commit:
 - Published Maven version:
 - Verification:
@@ -36,7 +37,8 @@ The goal is to make every future upstream refresh reproducible: we should know w
 - Upstream base tag: `1.9.1`
 - Upstream base commit: `b7f356da8cb61250bfa8657d82cb8c7ed3e7da45`
 - Fork branch: `master`
-- Fork feature commit: `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e`
+- Fork feature commits:
+  - `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e` - Add context builder support
 - Fork release commit: `f10cd4d5980f409b587d5e71d4aad77bde8e6762`
 - Published Maven version: `1.9.1-fork.1`
 - Verification:
@@ -55,7 +57,9 @@ The goal is to make every future upstream refresh reproducible: we should know w
 - Upstream base tag: `1.9.1`
 - Upstream base commit: `b7f356da8cb61250bfa8657d82cb8c7ed3e7da45`
 - Fork branch: `master`
-- Fork feature commit: `56e75dc3178f79519467cb2ced912a78e62bcdba`
+- Fork feature commits:
+  - `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e` - Add context builder support
+  - `56e75dc3178f79519467cb2ced912a78e62bcdba` - Support placeholders in builder interface names
 - Fork release commit: `b5b65ac79c3fa5b7415a020df3295ba8726a300c`
 - Published Maven version: `1.9.1-fork.2`
 - Verification:
@@ -73,7 +77,9 @@ The goal is to make every future upstream refresh reproducible: we should know w
 - Upstream base tag: `1.9.2`
 - Upstream base commit: `53085b0f7cba2c4c089d03bdf23dab033b11aaf7`
 - Fork branch: `master`
-- Fork feature commit: `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e`
+- Fork feature commits:
+  - `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e` - Add context builder support
+  - `56e75dc3178f79519467cb2ced912a78e62bcdba` - Support placeholders in builder interface names
 - Fork release commit: not released
 - Published Maven version: not published
 - Verification:

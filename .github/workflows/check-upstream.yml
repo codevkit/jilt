@@ -113,12 +113,49 @@ jobs:
             relationship="Recorded base is not an ancestor of upstream ${upstream_default_branch}. Manual inspection is required."
           fi
 
+          title="Track upstream jilt updates"
+          existing_issue="$(gh api \
+            --method GET \
+            "repos/${GITHUB_REPOSITORY}/issues" \
+            -f state=open \
+            -f per_page=100 \
+            --jq ".[] | select(.title == \"${title}\") | .number" \
+            | head -n 1)"
+
           if [[ "${head_changed}" == "false" && "${tag_changed}" == "false" ]]; then
+            if [[ -n "${existing_issue}" ]]; then
+              resolved_comment_body="$(cat <<EOF
+          Upstream synchronization is complete.
+
+          - Recorded upstream base commit: \`${recorded_base_commit}\`
+          - Upstream default branch: \`${upstream_default_branch}\`
+          - Upstream HEAD: \`${upstream_head}\`
+          - Latest upstream release tag: \`${latest_upstream_tag:-unknown}\`
+          - Fork commit recording the synchronized state: \`${GITHUB_SHA}\`
+
+          Closing this tracking issue because the recorded fork base now matches upstream.
+          EOF
+              )"
+
+              gh api \
+                --method POST \
+                "repos/${GITHUB_REPOSITORY}/issues/${existing_issue}/comments" \
+                -f body="${resolved_comment_body}"
+
+              gh api \
+                --method PATCH \
+                "repos/${GITHUB_REPOSITORY}/issues/${existing_issue}" \
+                -f state=closed \
+                -f state_reason=completed
+
+              echo "Closed synchronized upstream tracking issue #${existing_issue}."
+              exit 0
+            fi
+
             echo "No upstream branch or release-tag update beyond the recorded fork base."
             exit 0
           fi
 
-          title="Track upstream jilt updates"
           state_marker="<!-- upstream-tracking-state: latest-tag=${latest_upstream_tag:-unknown} upstream-head=${upstream_head} -->"
           body="$(cat <<EOF
           ${state_marker}
@@ -157,14 +194,6 @@ jobs:
           The tracking issue body has been updated with this latest state.
           EOF
           )"
-
-          existing_issue="$(gh api \
-            --method GET \
-            "repos/${GITHUB_REPOSITORY}/issues" \
-            -f state=open \
-            -f per_page=100 \
-            --jq ".[] | select(.title == \"${title}\") | .number" \
-            | head -n 1)"
 
           if [[ -n "${existing_issue}" ]]; then
             existing_issue_body="$(gh api \

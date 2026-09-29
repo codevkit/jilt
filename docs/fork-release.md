@@ -44,7 +44,7 @@ Verify it before publishing:
 javap -verbose -classpath build/libs/jilt-<version>.jar org.jilt.Builder | rg 'major version'
 ```
 
-Do not publish this fork with JDK 25 while it uses Gradle 8.5; Gradle 8.5 does not reliably support that runtime. Do not use JDK 8 for new fork releases unless the fork policy changes back to upstream Java 8 bytecode compatibility.
+The wrapper currently uses Gradle 8.14.5, but wrapper runtime compatibility does not change the fork's release baseline. Publish with JDK 17 so release artifacts consistently target Java 17 bytecode. Do not use JDK 8 or a newer JDK for a fork release unless this policy and the expected class file version are deliberately updated first.
 
 ## Verification
 
