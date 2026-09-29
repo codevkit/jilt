@@ -5,7 +5,7 @@ This fork publishes independently from upstream Jilt.
 ## Coordinates
 
 ```text
-io.github.codevkit.jilt:jilt:1.9.1-fork.2
+io.github.codevkit.jilt:jilt:1.9.2-fork.1
 ```
 
 Keep fork releases on the upstream-version-plus-fork-counter line:
@@ -14,7 +14,7 @@ Keep fork releases on the upstream-version-plus-fork-counter line:
 <upstream-version>-fork.<n>
 ```
 
-For example, the first Codevkit release based on upstream `1.9.1` is `1.9.1-fork.1`.
+For example, the first Codevkit release based on upstream `1.9.2` is `1.9.2-fork.1`.
 
 ## Java Baseline
 

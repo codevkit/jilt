@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'io.github.codevkit.jilt'
-version '1.9.2-fork.1-SNAPSHOT'
+version '1.9.2-fork.1'
 
 shadowJar {
     relocate 'com', 'org.jilt.shaded.com'

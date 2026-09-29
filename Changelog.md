@@ -1,3 +1,10 @@
+Version 1.9.2-fork.1 (2026-09-29)
+---------------------------------
+- Merge upstream Jilt 1.9.2, including support for marking nullable properties as required with `@Req`
+- Add `@Builder.contextType` and `@Builder.contextMethod` for passing one construction context value
+  through Classic, Staged, Functional, and Abstract Builders
+- Support target class placeholders in generated builder interface names
+
 Version 1.9.2 (2026-08-16)
 --------------------------
 - Allow `@Nullable` properties to be required with the `@Req` annotation
