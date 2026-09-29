@@ -82,11 +82,26 @@ Legacy `ossrhUsername` and `ossrhPassword` properties are still accepted.
 
 ## Publish
 
-Publish the fork artifact to Maven Central:
+Upload the signed fork artifacts to the OSSRH Staging API compatibility service:
 
 ```bash
-JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew publishShadowPublicationToMavenCentralRepository -PpublishToMavenCentral=true
+JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr \
+  ./gradlew publishShadowPublicationToMavenCentralRepository -PpublishToMavenCentral=true
 ```
+
+Gradle's built-in `maven-publish` plugin only uploads files. Transfer the completed staging repository into the Central Publisher Portal with the Portal token credentials used by Gradle. For this command, expose them as `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD` environment variables even if Gradle read them from properties:
+
+```bash
+CENTRAL_AUTH="$(printf '%s' \
+  "${MAVEN_CENTRAL_USERNAME}:${MAVEN_CENTRAL_PASSWORD}" \
+  | base64 | tr -d '\n')"
+printf 'header = "Authorization: Bearer %s"\n' "${CENTRAL_AUTH}" \
+  | curl --config - --fail-with-body --request POST \
+      'https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.codevkit?publishing_type=user_managed'
+unset CENTRAL_AUTH
+```
+
+Wait for the deployment to reach `VALIDATED`, review it in the Portal, and publish it. The deployment will not appear in the Portal until the manual upload request succeeds.
 
 After the Central deployment is published, update `docs/fork-maintenance-log.md` with:
 

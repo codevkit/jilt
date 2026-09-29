@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-java@v5.6.0
         with:
           java-version: ${{ matrix.version }}
-          distribution: 'adopt-hotspot'
+          distribution: 'temurin'
 
       - name: Cache Gradle packages
         uses: gradle/actions/setup-gradle@v6.2.0
