@@ -86,3 +86,25 @@ The goal is to make every future upstream refresh reproducible: we should know w
   - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew clean build check`
   - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew publishToMavenLocal`
 - Notes: Merges upstream `1.9.2`, including required nullable properties through `@Req`, while retaining the Codevkit context builder extensions and independent Maven coordinates. The next fork release is staged as `1.9.2-fork.1-SNAPSHOT`.
+
+## 1.9.2-fork.1
+
+- Date: 2026-09-29
+- Upstream remote: `git@github.com:skinny85/jilt.git`
+- Upstream base tag: `1.9.2`
+- Upstream base commit: `53085b0f7cba2c4c089d03bdf23dab033b11aaf7`
+- Fork branch: `master`
+- Fork feature commits:
+  - `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e` - Add context builder support
+  - `56e75dc3178f79519467cb2ced912a78e62bcdba` - Support placeholders in builder interface names
+- Fork release commit: `1634eb323a0597b98e838856094858b7f376f8e8`
+- Published Maven version: `1.9.2-fork.1`
+- Verification:
+  - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew clean build check`
+  - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew publishToMavenLocal`
+  - `javap -verbose -classpath build/libs/jilt-1.9.2-fork.1.jar org.jilt.Builder | rg 'major version'` reported `major version: 61`.
+  - GitHub Actions build `36532149972` passed on Java 8, 11, 17, and 21.
+  - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew publishShadowPublicationToMavenCentralRepository -PpublishToMavenCentral=true`
+  - Central Portal deployment `7b8da6ca-789e-4ea0-a9d0-d7bf20c10b97` reached `PUBLISHED`.
+  - The public Maven Central POM returned HTTP 200.
+- Notes: First Codevkit fork release based on upstream `1.9.2`. It retains context builder support and builder interface placeholders while adding upstream `@Req` support.
