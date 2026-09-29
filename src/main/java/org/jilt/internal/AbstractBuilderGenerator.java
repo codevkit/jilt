@@ -18,6 +18,7 @@ import com.squareup.javapoet.WildcardTypeName;
 import org.jilt.Builder;
 import org.jilt.JiltGenerated;
 import org.jilt.Opt;
+import org.jilt.Req;
 import org.jilt.utils.Utils;
 
 import javax.annotation.processing.Filer;
@@ -51,6 +52,7 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
     private final Elements elements;
     private final Filer filer;
     private final Element optElement;
+    private final Element reqElement;
 
     /** nullable */ private final TypeElement targetClassTypeElement;
     private final List<? extends VariableElement> attributes;
@@ -68,6 +70,7 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
         this.elements = elements;
         this.filer = filer;
         this.optElement = this.elements.getTypeElement(Opt.class.getCanonicalName());
+        this.reqElement = this.elements.getTypeElement(Req.class.getCanonicalName());
 
         this.targetClassTypeElement = targetClass;
         this.attributes = attributes;
@@ -564,8 +567,8 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
 
     private boolean isAnnotationAllowedOnParam(AnnotationMirror annotation) {
         Element annotationElement = annotation.getAnnotationType().asElement();
-        if (annotationElement == this.optElement) {
-            // we don't want to propagate Jilt's @Opt annotation to the builder
+        if (annotationElement == this.optElement || annotationElement == this.reqElement) {
+            // we don't want to propagate Jilt's @Opt or @Req annotations to the builder
             return false;
         }
 
@@ -711,7 +714,7 @@ abstract class AbstractBuilderGenerator implements BuilderGenerator {
         ClassName generatedAnnotationClass = determineGeneratedAnnotationClass();
         return AnnotationSpec
                 .builder(generatedAnnotationClass)
-                .addMember("value", "$S", "Jilt-1.9.1")
+                .addMember("value", "$S", "Jilt-1.9.2")
                 .build();
     }
 

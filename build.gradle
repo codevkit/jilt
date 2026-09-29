@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'io.github.codevkit.jilt'
-version '1.9.1-fork.2'
+version '1.9.2-fork.1-SNAPSHOT'
 
 shadowJar {
     relocate 'com', 'org.jilt.shaded.com'
@@ -117,21 +117,21 @@ if (JavaVersion.current() < JavaVersion.VERSION_17) {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     dependencies {
-        testImplementation 'org.jspecify:jspecify:1.0.0'
+        testImplementation 'org.jspecify:jspecify:1.0.1'
     }
 }
 
 dependencies {
     compileOnly 'com.squareup:javapoet:1.13.0'
-    compileOnly 'com.github.javaparser:javaparser-core:3.28.0'
+    compileOnly 'com.github.javaparser:javaparser-core:3.28.2'
 
-    testImplementation 'com.github.javaparser:javaparser-core:3.28.0'
+    testImplementation 'com.github.javaparser:javaparser-core:3.28.2'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.assertj:assertj-core:3.27.6'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
     testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
     testAnnotationProcessor project
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.42'
-    testCompileOnly 'org.projectlombok:lombok:1.18.42'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
+    testCompileOnly 'org.projectlombok:lombok:1.18.46'
 }
 // required in Gradle 8, since the above line 'testAnnotationProcessor project'
 // creates an implicit dependency on shadowJar from compileTestJava

@@ -65,3 +65,18 @@ The goal is to make every future upstream refresh reproducible: we should know w
   - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew publishShadowPublicationToMavenCentralRepository -PpublishToMavenCentral=true`
   - Central Portal deployment `eb8d19d0-6c7c-4305-ba8b-15f7aa63eb1a` published successfully.
 - Notes: Releases the builder interface placeholder fix and records the Codevkit fork Java 17 baseline.
+
+## Upstream 1.9.2 Sync
+
+- Date: 2026-09-29
+- Upstream remote: `git@github.com:skinny85/jilt.git`
+- Upstream base tag: `1.9.2`
+- Upstream base commit: `53085b0f7cba2c4c089d03bdf23dab033b11aaf7`
+- Fork branch: `master`
+- Fork feature commit: `fc4bc4afcbb98b1fb1725a8496468806d3c8c37e`
+- Fork release commit: not released
+- Published Maven version: not published
+- Verification:
+  - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew clean build check`
+  - `JAVA_HOME=~/.sdkman/candidates/java/17.0.14-jbr ./gradlew publishToMavenLocal`
+- Notes: Merges upstream `1.9.2`, including required nullable properties through `@Req`, while retaining the Codevkit context builder extensions and independent Maven coordinates. The next fork release is staged as `1.9.2-fork.1-SNAPSHOT`.

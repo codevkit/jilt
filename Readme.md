@@ -111,7 +111,7 @@ dependencies {
 
 If you're not using dependency managers, you can
 [download the JAR directly](https://repo1.maven.org/maven2/io/github/codevkit/jilt/jilt/1.9.1-fork.2/jilt-1.9.1-fork.2.jar)
-after the fork release is published
+(it's distributed as a self-contained JAR, you don't need any additional dependencies for it)
 and add it to your classpath.
 
 #### Customizing the generated code
@@ -322,11 +322,16 @@ User user = UserBuilder.user()
 ```
 
 In addition to the `@Opt` annotation,
-a property will always be considered optional if the field or parameter it was generated from is annotated with a `@Nullable` annotation.
+a property will be considered optional if the field or parameter it was generated from is annotated with a `@Nullable` annotation.
 All types of `@Nullable` annotations are supported,
 including `javax.annotation.Nullable` from [JSR-305](https://central.sonatype.com/artifact/com.google.code.findbugs/jsr305),
 `org.jetbrains.annotations.Nullable` from [JetBrains annotations](https://central.sonatype.com/artifact/org.jetbrains/annotations),
 and others.
+
+If you want to annotate a property with a `@Nullable` annotation,
+but keep it as being required,
+annotate it with the opposite of `@Opt`,
+the `@Req` annotation, from the same `org.jilt` package.
 
 ##### 'Staged, but preserving order' Builder style
 
